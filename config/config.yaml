@@ -1,0 +1,7 @@
+server:
+  host: "localhost"
+  port: "8080"
+
+kaspi:
+  base_url: "https://mtokentest.kaspi.kz:8545/r3/v01/"
+  auth_mode: "api_key"
