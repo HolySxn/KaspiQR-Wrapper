@@ -3,11 +3,14 @@ package kaspihandler
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
+	"os"
 
+	"github.com/HolySxn/KaspiQR-Wrapper/config"
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/models"
 	"github.com/google/uuid"
 )
@@ -40,16 +43,31 @@ type KaspiHandler struct {
 	apiKey  string
 }
 
-func NewKaspiHandler(baseURL string, apiKey string) *KaspiHandler {
-	client := &http.Client{
-		Timeout: time.Second,
+func NewKaspiHandler(cfg *config.Config) (*KaspiHandler, error) {
+	var httpClient *http.Client
+
+	switch cfg.Kaspi.AuthMode {
+	case config.AuthModeAPIKey:
+		httpClient = &http.Client{}
+	case config.AuthModeMTLS, config.AuthModeIPBased:
+		tlsConfig, err := tlsConfig(cfg.Kaspi.ClientCert, cfg.Kaspi.ClientKey, cfg.Kaspi.CACert)
+		if err != nil {
+			return nil, err
+		}
+
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConfig,
+			},
+		}
+
 	}
 
 	return &KaspiHandler{
-		Client:  client,
-		baseURL: baseURL,
-		apiKey:  apiKey,
-	}
+		Client:  httpClient,
+		baseURL: cfg.Kaspi.BaseURL,
+		apiKey:  cfg.Kaspi.APIKey,
+	}, nil
 }
 
 func (h *KaspiHandler) seteHeader(req *http.Request) {
@@ -95,4 +113,29 @@ func (h *KaspiHandler) doRequest(ctx context.Context, method, url string, body i
 	}
 
 	return rawResp.Data, nil
+}
+
+func tlsConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
+	clientCert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	caCert, err := os.ReadFile(caFile)
+	if err != nil {
+		return nil, err
+	}
+
+	caCertPool := x509.NewCertPool()
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		return nil, fmt.Errorf("failed to append CA cert")
+	}
+
+	config := &tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      caCertPool,
+		MinVersion:   tls.VersionTLS12,
+	}
+
+	return config, nil
 }

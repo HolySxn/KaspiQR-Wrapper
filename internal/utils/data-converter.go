@@ -17,3 +17,4 @@ func Convert[T any](data interface{}) (T, error) {
 
 	return result, nil
 }
+

@@ -17,3 +17,4 @@ func NewHandler(logger *slog.Logger, kaspiHandler *kaspihandler.KaspiHandler) *H
 		kaspiHandler: kaspiHandler,
 	}
 }
+
