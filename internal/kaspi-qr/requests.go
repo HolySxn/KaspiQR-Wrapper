@@ -115,3 +115,19 @@ func (h *KaspiHandler) CreateLink(ctx context.Context, deviceToken string, amoun
 
 	return link, nil
 }
+
+func (h *KaspiHandler) GetPaymentStatus(ctx context.Context, deviceToken string, qrPaymentToken string) (models.PaymentStatus, error) {
+	url := h.baseURL + "/payment/status/" + qrPaymentToken
+
+	data, err := h.doRequest(ctx, http.MethodPost, url, nil)
+	if err != nil {
+		return models.PaymentStatus{}, err
+	}
+
+	status, err := utils.Convert[models.PaymentStatus](data)
+	if err != nil {
+		return models.PaymentStatus{}, fmt.Errorf("failed to convert data to PaymentStatus: %w", err)
+	}
+
+	return status, nil
+}
