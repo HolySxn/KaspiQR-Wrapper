@@ -92,3 +92,26 @@ func TestQRCreate(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, qr)
 }
+
+func TestLinkCreate(t *testing.T) {
+	handler := NewKaspiHandler(base_url, test_api)
+	handler.Client = &http.Client{
+		Timeout: time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	deviceID := "GFC-456398"
+	var tradePoint int64 = 23
+	ctx := context.Background()
+	deviceToken, err := handler.DeviceRegister(ctx, deviceID, tradePoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	linkData, err := handler.CreateLink(ctx, deviceToken.Token, 200, uuid.NewString())
+	assert.NoError(t, err)
+	assert.NotEmpty(t, linkData)
+	t.Log(linkData)
+}
