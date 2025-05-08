@@ -1,16 +1,12 @@
-package kaspihandler
+package base
 
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
-	"github.com/HolySxn/KaspiQR-Wrapper/config"
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/models"
 	"github.com/google/uuid"
 )
@@ -37,49 +33,18 @@ var kaspiStatusMessages = map[int]string{
 	-999:      "Сервис временно недоступен",
 }
 
-type KaspiHandler struct {
+type BaseKaspiClient struct {
 	Client  *http.Client
-	baseURL string
-	apiKey  string
+	BaseURL string
 }
 
-func NewKaspiHandler(cfg *config.Config) (*KaspiHandler, error) {
-	var httpClient *http.Client
-
-	switch cfg.Kaspi.AuthMode {
-	case config.AuthModeAPIKey:
-		httpClient = &http.Client{}
-	case config.AuthModeMTLS, config.AuthModeIPBased:
-		tlsConfig, err := tlsConfig(cfg.Kaspi.ClientCert, cfg.Kaspi.ClientKey, cfg.Kaspi.CACert)
-		if err != nil {
-			return nil, err
-		}
-
-		httpClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
-			},
-		}
-
-	}
-
-	return &KaspiHandler{
-		Client:  httpClient,
-		baseURL: cfg.Kaspi.BaseURL,
-		apiKey:  cfg.Kaspi.APIKey,
-	}, nil
-}
-
-func (h *KaspiHandler) seteHeader(req *http.Request) {
+func (h *BaseKaspiClient) seteHeader(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Request-ID", uuid.New().String())
-	if h.apiKey != "" {
-		req.Header.Set("Api-Key", h.apiKey)
-	}
 }
 
-func (h *KaspiHandler) doRequest(ctx context.Context, method, url string, body interface{}) (interface{}, error) {
+func (h *BaseKaspiClient) doRequest(ctx context.Context, method, url string, body interface{}) (interface{}, error) {
 	var reqBody *bytes.Reader
 	if body != nil {
 		bodyBytes, err := json.Marshal(body)
@@ -113,29 +78,4 @@ func (h *KaspiHandler) doRequest(ctx context.Context, method, url string, body i
 	}
 
 	return rawResp.Data, nil
-}
-
-func tlsConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
-	clientCert, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		return nil, err
-	}
-
-	caCert, err := os.ReadFile(caFile)
-	if err != nil {
-		return nil, err
-	}
-
-	caCertPool := x509.NewCertPool()
-	if !caCertPool.AppendCertsFromPEM(caCert) {
-		return nil, fmt.Errorf("failed to append CA cert")
-	}
-
-	config := &tls.Config{
-		Certificates: []tls.Certificate{clientCert},
-		RootCAs:      caCertPool,
-		MinVersion:   tls.VersionTLS12,
-	}
-
-	return config, nil
 }

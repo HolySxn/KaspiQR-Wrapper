@@ -13,7 +13,7 @@ import (
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
 	httpServer "github.com/HolySxn/KaspiQR-Wrapper/internal/handler"
 	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/handler/handlers"
-	kaspihandler "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr"
+	kaspiqr "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +26,7 @@ func main() {
 		return
 	}
 
-	kaspiHandler, err := kaspihandler.NewKaspiHandler(cfg)
+	kaspiHandler, err := kaspiqr.NewKaspiClient(cfg)
 	if err != nil {
 		logger.Error("failed to create kaspi ahndler", slog.Any("err", err))
 	}

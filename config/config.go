@@ -25,6 +25,7 @@ type Config struct {
 		AuthMode AuthMode `mapstructure:"auth_mode"`
 
 		APIKey     string `mapstructure:"-"`
+		CompanyBIN string `mapstructure:"-"`
 		ClientCert string `mapstructure:"-"`
 		ClientKey  string `mapstructure:"-"`
 		CACert     string `mapstructure:"-"`
@@ -45,6 +46,7 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	cfg.Kaspi.APIKey = os.Getenv("KASPI_API_KEY")
+	cfg.Kaspi.CompanyBIN = os.Getenv("COMPANY_BIN")
 	cfg.Kaspi.ClientCert = os.Getenv("KASPI_CLIENT_CERT")
 	cfg.Kaspi.ClientKey = os.Getenv("KASPI_CLIENT_KEY")
 	cfg.Kaspi.CACert = os.Getenv("KASPI_CA_CERT")
