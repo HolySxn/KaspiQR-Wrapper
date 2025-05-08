@@ -5,23 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	baseClient "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr/base"
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/models"
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/utils"
 )
-
-type MtlsKaspiClient struct {
-	*baseClient.BaseKaspiClient
-}
-
-func New(baseURL string, httpClient *http.Client) *MtlsKaspiClient {
-	return &MtlsKaspiClient{
-		BaseKaspiClient: &baseClient.BaseKaspiClient{
-			BaseURL: baseURL,
-			Client:  httpClient,
-		},
-	}
-}
 
 type CreateReturnRequest struct {
 	DeviceToken string `json:"DeviceToken"`
@@ -91,20 +77,10 @@ func (c *MtlsKaspiClient) ReturnOperations(ctx context.Context, deviceToken stri
 	return operations, nil
 }
 
-type PaymentDetailsRequest struct {
-	QrPaymentId int64  `json:"QrPaymentId"`
-	DeviceToken string `json:"DeviceToken"`
-}
-
 func (c *MtlsKaspiClient) PaymentDetails(ctx context.Context, qrPaymentID int64, deviceToken string) (models.PaymentDetails, error) {
-	url := c.BaseURL + "/payment/details"
+	url := fmt.Sprintf("%s/payment/details?QrPaymentId=%d&DeviceToken=%s", c.BaseURL, qrPaymentID, deviceToken)
 
-	body := PaymentDetailsRequest{
-		QrPaymentId: qrPaymentID,
-		DeviceToken: deviceToken,
-	}
-
-	data, err := c.DoRequest(ctx, http.MethodPost, url, body)
+	data, err := c.DoRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return models.PaymentDetails{}, err
 	}
