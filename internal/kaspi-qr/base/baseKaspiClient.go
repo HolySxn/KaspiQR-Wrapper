@@ -38,13 +38,13 @@ type BaseKaspiClient struct {
 	BaseURL string
 }
 
-func (h *BaseKaspiClient) seteHeader(req *http.Request) {
+func (c *BaseKaspiClient) SeteHeader(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Request-ID", uuid.New().String())
 }
 
-func (h *BaseKaspiClient) doRequest(ctx context.Context, method, url string, body interface{}) (interface{}, error) {
+func (c *BaseKaspiClient) DoRequest(ctx context.Context, method, url string, body interface{}) (interface{}, error) {
 	var reqBody *bytes.Reader
 	if body != nil {
 		bodyBytes, err := json.Marshal(body)
@@ -61,9 +61,9 @@ func (h *BaseKaspiClient) doRequest(ctx context.Context, method, url string, bod
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	h.seteHeader(req)
+	c.SeteHeader(req)
 
-	res, err := h.Client.Do(req)
+	res, err := c.Client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}

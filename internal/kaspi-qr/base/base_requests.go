@@ -12,7 +12,7 @@ import (
 func (c *BaseKaspiClient) GetTradePoints(ctx context.Context) ([]models.TradePoint, error) {
 	url := c.BaseURL + "/partner/tradepoints"
 
-	data, err := c.doRequest(ctx, http.MethodGet, url, nil)
+	data, err := c.DoRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (c *BaseKaspiClient) DeviceRegister(ctx context.Context, deviceID string, t
 		TradePointID: tradePointID,
 	}
 
-	data, err := c.doRequest(ctx, http.MethodPost, url, body)
+	data, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return models.DeviceToken{}, err
 	}
@@ -60,7 +60,7 @@ func (c *BaseKaspiClient) DeviceDelete(ctx context.Context, deviceToken string) 
 		DeviceToken: deviceToken,
 	}
 
-	_, err := c.doRequest(ctx, http.MethodPost, url, body)
+	_, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (c *BaseKaspiClient) CreateQR(ctx context.Context, deviceToken string, amou
 		ExternalID:  externalID,
 	}
 
-	data, err := c.doRequest(ctx, http.MethodPost, url, body)
+	data, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return models.QrToken{}, err
 	}
@@ -103,7 +103,7 @@ func (c *BaseKaspiClient) CreateLink(ctx context.Context, deviceToken string, am
 		ExternalID:  externalID,
 	}
 
-	data, err := c.doRequest(ctx, http.MethodPost, url, body)
+	data, err := c.DoRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return models.PaymentData{}, err
 	}
@@ -116,10 +116,10 @@ func (c *BaseKaspiClient) CreateLink(ctx context.Context, deviceToken string, am
 	return link, nil
 }
 
-func (h *BaseKaspiClient) GetPaymentStatus(ctx context.Context, deviceToken string, qrPaymentToken string) (models.PaymentStatus, error) {
-	url := h.BaseURL + "/payment/status/" + qrPaymentToken
+func (c *BaseKaspiClient) GetPaymentStatus(ctx context.Context, qrPaymentToken string) (models.PaymentStatus, error) {
+	url := c.BaseURL + "/payment/status/" + qrPaymentToken
 
-	data, err := h.doRequest(ctx, http.MethodPost, url, nil)
+	data, err := c.DoRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return models.PaymentStatus{}, err
 	}

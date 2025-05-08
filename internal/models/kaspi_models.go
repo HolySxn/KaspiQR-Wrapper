@@ -9,7 +9,7 @@ type RawResponse struct {
 }
 
 type TradePoint struct {
-	TradePointID   int64  `json:"TradePointId"`
+	TradePointId   int64  `json:"TradePointId"`
 	TradePointName string `json:"TradePointName"`
 }
 
@@ -17,6 +17,7 @@ type DeviceToken struct {
 	Token string `json:"DeviceToken"`
 }
 
+// Create QR response
 type QrPaymentBehaviorOptions struct {
 	StatusPollingInterval      int `json:"StatusPollingInterval"`
 	QrCodeScanWaitTimeout      int `json:"QrCodeScanWaitTimeout"`
@@ -31,6 +32,7 @@ type QrToken struct {
 	QrPaymentBehaviorOptions QrPaymentBehaviorOptions `json:"QrPaymentBehaviorOptions"`
 }
 
+// Create link response
 type PaymentBehaviorOptions struct {
 	StatusPollingInterval      int `json:"StatusPollingInterval"`
 	LinkActivationWaitTimeout  int `json:"LinkActivationWaitTimeout"`
@@ -45,6 +47,7 @@ type PaymentData struct {
 	PaymentBehaviorOptions PaymentBehaviorOptions `json:"PaymentBehaviorOptions"`
 }
 
+// QR/Payment status
 type PaymentStatus struct {
 	Status        string      `json:"Status"`
 	TransactionId string      `json:"TransactionId"`
@@ -57,4 +60,42 @@ type PaymentStatus struct {
 	StoreName     string      `json:"StoreName"`
 	Address       string      `json:"Address"`
 	City          string      `json:"City"`
+}
+
+// Create return response
+type QrReturnBehaviorOptions struct {
+	QrCodeScanEventPollingInterval int `json:"QrCodeScanEventPollingInterval"`
+	QrCodeScanWaitTimeout          int `json:"QrCodeScanWaitTimeout"`
+}
+
+type Return struct {
+	QrToken                 string                  `json:"QrToken"`
+	ExpireDate              time.Time               `json:"ExpireDate"`
+	QrReturnId              int                     `json:"QrReturnId"`
+	QrReturnBehaviorOptions QrReturnBehaviorOptions `json:"QrReturnBehaviorOptions"`
+}
+
+// Return status
+type ReturnStatus struct {
+	Status string `json:"Status"`
+}
+
+// Recent purchases response
+type RecentOperation struct {
+	QrPaymentId     int64     `json:"QrPaymentId"`
+	TransactionDate time.Time `json:"TransactionDate"`
+	Amount          float64   `json:"Amount"`
+}
+
+// Payment details response
+type PaymentDetails struct {
+	QrPaymentId           int64     `json:"QrPaymentId"`
+	TotalAmount           float64   `json:"TotalAmount"`
+	AvailableReturnAmount float64   `json:"AvailableReturnAmount"`
+	TransactionDate       time.Time `json:"TransactionDate"`
+}
+
+// Payment Return response
+type ReturnOperationId struct {
+	Id int64 `json:"ReturnOperationId"`
 }
