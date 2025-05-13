@@ -1,10 +1,11 @@
 package config
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
-	"github.com/spf13/viper"
+	"github.com/sethvargo/go-envconfig"
 )
 
 type AuthMode string
@@ -15,42 +16,42 @@ const (
 	AuthModeIPBased AuthMode = "ip_based"
 )
 
-type Config struct {
-	Server struct {
-		Port string `mapstructure:"port"`
-		Host string `mapstructure:"host"`
-	} `mapstructure:"server"`
-	Kaspi struct {
-		BaseURL  string   `mapstructure:"base_url"`
-		AuthMode AuthMode `mapstructure:"auth_mode"`
-
-		APIKey     string `mapstructure:"-"`
-		CompanyBIN string `mapstructure:"-"`
-		ClientCert string `mapstructure:"-"`
-		ClientKey  string `mapstructure:"-"`
-		CACert     string `mapstructure:"-"`
-	} `mapstructure:"kaspi"`
+type ServerConfig struct {
+	Port   string `env:"PORT,default=8000"`
+	Host   string `env:"HOST,default=0.0.0.0"`
+	LogLvl string `env:"LOG_LEVEL,default=debug"`
 }
 
-func LoadConfig(path string) (*Config, error) {
-	viper.SetConfigFile(path)
-	viper.AutomaticEnv()
+type KaspiConfig struct {
+	BaseURL    string   `env:"BASE_URL"`
+	AuthMode   AuthMode `env:"AUTH_MODE"`
+	APIKey     string   `env:"API_KEY"`
+	CompanyBIN string   `env:"COMPANY_BIN"`
+	ClientCert string   `env:"CLIENT_CERT"`
+	ClientKey  string   `env:"CLIENT_KEY"`
+	CACert     string   `env:"CA_CERT"`
+}
 
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
+type PostgresConfig struct {
+	Host     string `env:"HOST,default=localhost"`
+	Port     string `env:"PORT,default=5432"`
+	User     string `env:"USER,default=postgres"`
+	Password string `env:"PASSWORD"`
+	DBName   string `env:"DB,default=postgres"`
+	SSLMode  string `env:"SSLMODE,default=disable"`
+}
 
+type Config struct {
+	Server   ServerConfig   `env:",prefix=SERVER_"`
+	Kaspi    KaspiConfig    `env:",prefix=KASPI_"`
+	Postgres PostgresConfig `env:",prefix=POSTGRES_"`
+}
+
+func LoadConfig(ctx context.Context) (*Config, error) {
 	var cfg Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := envconfig.Process(ctx, &cfg); err != nil {
 		return nil, err
 	}
-
-	cfg.Kaspi.APIKey = os.Getenv("KASPI_API_KEY")
-	cfg.Kaspi.CompanyBIN = os.Getenv("COMPANY_BIN")
-	cfg.Kaspi.ClientCert = os.Getenv("KASPI_CLIENT_CERT")
-	cfg.Kaspi.ClientKey = os.Getenv("KASPI_CLIENT_KEY")
-	cfg.Kaspi.CACert = os.Getenv("KASPI_CA_CERT")
-
 	return &cfg, nil
 }
 
@@ -58,6 +59,5 @@ func NewLogger() *slog.Logger {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
-
 	return logger
 }

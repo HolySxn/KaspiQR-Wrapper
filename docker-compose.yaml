@@ -1,0 +1,38 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: kaspiqr-wrapper-app
+    env_file:
+      - ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kaspiqr-wrapper-network
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: kaspiqr-wrapper-db
+    env_file:
+      - ./.env
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5432:5432
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - kaspiqr-wrapper-network
+
+volumes:
+  pg-data:
+
+networks:
+  kaspiqr-wrapper-network:
+    driver: bridge

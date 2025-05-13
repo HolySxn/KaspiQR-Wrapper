@@ -19,7 +19,7 @@ import (
 func main() {
 	logger := config.NewLogger()
 	ctx := context.Background()
-	cfg, err := config.LoadConfig("./config/config.yaml")
+	cfg, err := config.LoadConfig(ctx)
 	if err != nil {
 		logger.Error("failed to load config", slog.Any("error", err))
 		return
