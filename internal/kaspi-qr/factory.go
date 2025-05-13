@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
 	apikeyclient "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr/apikey"
@@ -52,14 +51,19 @@ func tlsConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
 		return nil, err
 	}
 
-	caCert, err := os.ReadFile(caFile)
+	// caCert, err := os.ReadFile(caFile)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// caCertPool := x509.NewCertPool()
+	// if !caCertPool.AppendCertsFromPEM(caCert) {
+	// 	return nil, fmt.Errorf("failed to append CA cert")
+	// }
+
+	caCertPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, err
-	}
-
-	caCertPool := x509.NewCertPool()
-	if !caCertPool.AppendCertsFromPEM(caCert) {
-		return nil, fmt.Errorf("failed to append CA cert")
 	}
 
 	config := &tls.Config{

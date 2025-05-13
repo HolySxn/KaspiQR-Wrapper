@@ -3,9 +3,14 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     container_name: kaspiqr-wrapper-app
     env_file:
       - ./.env
+    secrets:
+      - kaspi-client-cert
+      - kaspi-client-key
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,6 +37,12 @@ services:
 
 volumes:
   pg-data:
+
+secrets:
+  kaspi-client-cert:
+    file: ./certs/public.cer
+  kaspi-client-key:
+    file: ./certs/domain.key
 
 networks:
   kaspiqr-wrapper-network:

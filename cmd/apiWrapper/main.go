@@ -27,7 +27,8 @@ func main() {
 
 	kaspiHandler, err := kaspiqr.NewKaspiClient(cfg)
 	if err != nil {
-		logger.Error("failed to create kaspi ahndler", slog.Any("err", err))
+		logger.Error("failed to create kaspi handler", slog.Any("err", err))
+		return
 	}
 	serverHandler := httpHandler.NewHandler(logger, kaspiHandler)
 
