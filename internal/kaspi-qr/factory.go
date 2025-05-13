@@ -13,7 +13,7 @@ import (
 	mtlsClient "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr/mtls"
 )
 
-func NewKaspiClient(cfg *config.Config) (KaspiQR, error) {
+func NewKaspiClient(cfg *config.Config) (KaspiQRBase, error) {
 	var httpClient *http.Client
 
 	switch cfg.Kaspi.AuthMode {

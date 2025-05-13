@@ -16,7 +16,7 @@ type PaymentReturnRequest struct {
 	BIN         string  `json:"OrganizationBin"`
 }
 
-func (c *IPBasedKaspiClient) PaymentReturn(ctx context.Context, deviceToken string, qrPaymentID int64, qrReturnID int64, amount float64) (models.ReturnOperationId, error) {
+func (c *IPBasedKaspiClient) PaymentReturn(ctx context.Context, deviceToken string, qrPaymentID int64, amount float64) (models.ReturnOperationId, error) {
 	url := c.BaseURL + "/payment/return"
 
 	body := PaymentReturnRequest{
