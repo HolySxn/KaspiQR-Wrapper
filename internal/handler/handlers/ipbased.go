@@ -12,8 +12,11 @@ import (
 
 // GET /remote/client-info
 func (h *Handler) GetClientInfoIPBased(w http.ResponseWriter, r *http.Request) {
+	h.logger.Info("Handling GetClientInfoIPBased request", "method", r.Method, "url", r.URL.String())
+
 	ipClient, ok := h.kaspiClient.(kaspiqr.KaspiQRIPBased)
 	if !ok {
+		h.logger.Error("Client type not supported for GetClientInfoIPBased")
 		http.Error(w, "Not supported for this client type", http.StatusNotImplemented)
 		return
 	}
@@ -25,17 +28,22 @@ func (h *Handler) GetClientInfoIPBased(w http.ResponseWriter, r *http.Request) {
 
 	info, err := ipClient.GetClientInfo(ctx, phone, deviceToken)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.logger.Error("Failed to retrieve client information", "error", err)
+		http.Error(w, "Failed to retrieve client information. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
+	h.logger.Info("Successfully retrieved client information", "phone", phone)
 	json.NewEncoder(w).Encode(info)
 }
 
 // POST /remote/create
 func (h *Handler) CreateRemotePaymentIPBased(w http.ResponseWriter, r *http.Request) {
+	h.logger.Info("Handling CreateRemotePaymentIPBased request", "method", r.Method, "url", r.URL.String())
+
 	ipClient, ok := h.kaspiClient.(kaspiqr.KaspiQRIPBased)
 	if !ok {
+		h.logger.Error("Client type not supported for CreateRemotePaymentIPBased")
 		http.Error(w, "Not supported for this client type", http.StatusNotImplemented)
 		return
 	}
@@ -48,7 +56,8 @@ func (h *Handler) CreateRemotePaymentIPBased(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		h.logger.Error("Invalid request payload for CreateRemotePaymentIPBased", "error", err)
+		http.Error(w, "Invalid request. Please check your input and try again.", http.StatusBadRequest)
 		return
 	}
 
@@ -56,17 +65,22 @@ func (h *Handler) CreateRemotePaymentIPBased(w http.ResponseWriter, r *http.Requ
 
 	payment, err := ipClient.CreateRemotePayment(ctx, req.Amount, req.PhoneNumber, req.DeviceToken, req.Comment)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.logger.Error("Failed to create payment", "error", err)
+		http.Error(w, "Failed to create payment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
+	h.logger.Info("Successfully created payment", "amount", req.Amount, "phoneNumber", req.PhoneNumber)
 	json.NewEncoder(w).Encode(payment)
 }
 
 // POST /remote/cancel
 func (h *Handler) CancelRemotePaymentIPBased(w http.ResponseWriter, r *http.Request) {
+	h.logger.Info("Handling CancelRemotePaymentIPBased request", "method", r.Method, "url", r.URL.String())
+
 	ipClient, ok := h.kaspiClient.(kaspiqr.KaspiQRIPBased)
 	if !ok {
+		h.logger.Error("Client type not supported for CancelRemotePaymentIPBased")
 		http.Error(w, "Not supported for this client type", http.StatusNotImplemented)
 		return
 	}
@@ -77,7 +91,8 @@ func (h *Handler) CancelRemotePaymentIPBased(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		h.logger.Error("Invalid request payload for CancelRemotePaymentIPBased", "error", err)
+		http.Error(w, "Invalid request. Please check your input and try again.", http.StatusBadRequest)
 		return
 	}
 
@@ -85,17 +100,22 @@ func (h *Handler) CancelRemotePaymentIPBased(w http.ResponseWriter, r *http.Requ
 
 	status, err := ipClient.CancelRemotePayment(ctx, req.QrPaymentID, req.DeviceToken)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.logger.Error("Failed to cancel payment", "error", err)
+		http.Error(w, "Failed to cancel payment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
+	h.logger.Info("Successfully canceled payment", "qrPaymentId", req.QrPaymentID)
 	json.NewEncoder(w).Encode(status)
 }
 
 // POST /payment/return
 func (h *Handler) PaymentReturnIPBased(w http.ResponseWriter, r *http.Request) {
+	h.logger.Info("Handling PaymentReturnIPBased request", "method", r.Method, "url", r.URL.String())
+
 	ipClient, ok := h.kaspiClient.(kaspiqr.KaspiQRIPBased)
 	if !ok {
+		h.logger.Error("Client type not supported for PaymentReturnIPBased")
 		http.Error(w, "Not supported for this client type", http.StatusNotImplemented)
 		return
 	}
@@ -107,7 +127,8 @@ func (h *Handler) PaymentReturnIPBased(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		h.logger.Error("Invalid request payload for PaymentReturnIPBased", "error", err)
+		http.Error(w, "Invalid request. Please check your input and try again.", http.StatusBadRequest)
 		return
 	}
 
@@ -115,17 +136,22 @@ func (h *Handler) PaymentReturnIPBased(w http.ResponseWriter, r *http.Request) {
 
 	result, err := ipClient.PaymentReturn(ctx, req.DeviceToken, req.QrPaymentID, req.Amount)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.logger.Error("Failed to process payment return", "error", err)
+		http.Error(w, "Failed to process payment return. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
+	h.logger.Info("Successfully processed payment return", "qrPaymentId", req.QrPaymentID, "amount", req.Amount)
 	json.NewEncoder(w).Encode(result)
 }
 
 // GET /payment/details
 func (h *Handler) GetPaymentDetailsIPBased(w http.ResponseWriter, r *http.Request) {
+	h.logger.Info("Handling GetPaymentDetailsIPBased request", "method", r.Method, "url", r.URL.String())
+
 	ipClient, ok := h.kaspiClient.(kaspiqr.KaspiQRIPBased)
 	if !ok {
+		h.logger.Error("Client type not supported for GetPaymentDetailsIPBased")
 		http.Error(w, "Not supported for this client type", http.StatusNotImplemented)
 		return
 	}
@@ -135,7 +161,8 @@ func (h *Handler) GetPaymentDetailsIPBased(w http.ResponseWriter, r *http.Reques
 
 	qrPaymentID, err := strconv.ParseInt(qrPaymentIDStr, 10, 64)
 	if err != nil {
-		http.Error(w, "invalid qrPaymentId", http.StatusBadRequest)
+		h.logger.Error("Invalid qrPaymentId for GetPaymentDetailsIPBased", "error", err)
+		http.Error(w, "Invalid qrPaymentId. Please check your input and try again.", http.StatusBadRequest)
 		return
 	}
 
@@ -143,9 +170,11 @@ func (h *Handler) GetPaymentDetailsIPBased(w http.ResponseWriter, r *http.Reques
 
 	details, err := ipClient.GetPaymentDetails(ctx, qrPaymentID, deviceToken)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.logger.Error("Failed to retrieve payment details", "error", err)
+		http.Error(w, "Failed to retrieve payment details. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
+	h.logger.Info("Successfully retrieved payment details", "qrPaymentId", qrPaymentID)
 	json.NewEncoder(w).Encode(details)
 }

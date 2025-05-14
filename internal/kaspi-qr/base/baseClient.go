@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/models"
@@ -77,10 +78,17 @@ func (c *BaseKaspiClient) DoRequest(ctx context.Context, method, url string, bod
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
+	defer res.Body.Close()
+
+	bodyBytes, _ := io.ReadAll(res.Body)
+
+	// if res.StatusCode != http.StatusOK {
+	// 	return nil, fmt.Errorf("Kaspi API error: %s", string(bodyBytes))
+	// }
 
 	var rawResp models.RawResponse
-	if err := json.NewDecoder(res.Body).Decode(&rawResp); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
+	if err := json.Unmarshal(bodyBytes, &rawResp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w\nRaw body: %s", err, string(bodyBytes))
 	}
 
 	if rawResp.StatusCode != 0 {

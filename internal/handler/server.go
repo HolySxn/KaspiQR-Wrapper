@@ -11,9 +11,10 @@ import (
 func NewServer(
 	logger *slog.Logger,
 	serverHandler *httpHandler.Handler,
+	authMode string,
 ) http.Handler {
 	router := mux.NewRouter()
-	addRoutes(router, serverHandler)
+	addRoutes(router, serverHandler, authMode)
 
 	return router
 }
