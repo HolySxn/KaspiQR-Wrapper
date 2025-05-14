@@ -17,26 +17,49 @@ import (
 )
 
 func main() {
-	logger := config.NewLogger()
+	initialLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(initialLogger)
+
+	slog.Info("starting service")
+
 	ctx := context.Background()
 	cfg, err := config.LoadConfig(ctx)
 	if err != nil {
-		logger.Error("failed to load config", slog.Any("error", err))
-		return
+		slog.Error("failed to load config", slog.Any("error", err))
+		os.Exit(1)
 	}
+
+	deps, err := config.NewDependencies(
+		ctx,
+		config.WithLogger(cfg.Server.LogLvl),
+		config.WithPosgres(
+			cfg.Postgres.User,
+			cfg.Postgres.Password,
+			cfg.Postgres.Host,
+			cfg.Postgres.Port,
+			cfg.Postgres.DBName,
+			cfg.Postgres.SSLMode,
+		))
+
+	if err != nil {
+		slog.Error("failed to load dependencies", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer deps.Close()
+	slog.SetDefault(deps.Logger)
 
 	kaspiClient, err := kaspiqr.NewKaspiClient(cfg)
 	if err != nil {
-		logger.Error("failed to create kaspi handler", slog.Any("err", err))
-		return
+		slog.Error("failed to create kaspi handler", slog.Any("err", err))
+		os.Exit(1)
 	}
-	serverHandler := httpHandler.NewHandler(logger, kaspiClient)
+	serverHandler := httpHandler.NewHandler(deps.Logger, kaspiClient)
 
-	srv := httpServer.NewServer(logger, serverHandler, cfg.Kaspi.AuthMode)
-	run(ctx, cfg, srv, logger)
+	srv := httpServer.NewServer(deps.Logger, serverHandler, cfg.Kaspi.AuthMode)
+	run(ctx, cfg, srv)
 }
 
-func run(ctx context.Context, cfg *config.Config, srv http.Handler, logger *slog.Logger) {
+func run(ctx context.Context, cfg *config.Config, srv http.Handler) {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
@@ -46,9 +69,11 @@ func run(ctx context.Context, cfg *config.Config, srv http.Handler, logger *slog
 	}
 
 	go func() {
-		slog.Info("listening", "addr", httpServer.Addr)
+		slog.Info("server listening",
+			"address", httpServer.Addr,
+			"auth_mode", cfg.Kaspi.AuthMode)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Info("error listening and serving", "error", err)
+			slog.Info("error listening and serving", "error", err)
 		}
 	}()
 
@@ -60,7 +85,7 @@ func run(ctx context.Context, cfg *config.Config, srv http.Handler, logger *slog
 		shutdownCtx := context.Background()
 		shutdownCtx, cancel := context.WithTimeout(shutdownCtx, 10*time.Second)
 		defer cancel()
-		logger.Info("Gracefully shutting down...")
+		slog.Info("Gracefully shutting down...")
 		if err := httpServer.Shutdown(shutdownCtx); err != nil {
 			slog.Info("error shutting down http server", "error", err)
 		}
