@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
-	httpServer "github.com/HolySxn/KaspiQR-Wrapper/internal/handler"
-	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/handler/handlers"
+	httpServer "github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/http"
+	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/http/handlers"
 	kaspiqr "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr"
 )
 

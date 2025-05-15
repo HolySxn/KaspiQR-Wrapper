@@ -2,7 +2,7 @@ package httpServer
 
 import (
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
-	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/handler/handlers"
+	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/http/handlers"
 	"github.com/gorilla/mux"
 )
 

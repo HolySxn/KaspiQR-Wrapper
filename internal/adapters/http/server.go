@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/handler/handlers"
+	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/http/handlers"
 	"github.com/gorilla/mux"
 )
 
