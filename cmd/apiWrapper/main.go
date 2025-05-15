@@ -13,6 +13,8 @@ import (
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
 	httpServer "github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/http"
 	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/http/handlers"
+	"github.com/HolySxn/KaspiQR-Wrapper/internal/adapters/repository"
+	"github.com/HolySxn/KaspiQR-Wrapper/internal/core/service"
 	kaspiqr "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr"
 )
 
@@ -53,7 +55,11 @@ func main() {
 		slog.Error("failed to create kaspi handler", slog.Any("err", err))
 		os.Exit(1)
 	}
-	serverHandler := httpHandler.NewHandler(deps.Logger, kaspiClient)
+
+	repo := repository.New(deps.Postgres, deps.Logger)
+	deviceService := service.NewDeviceService(repo, kaspiClient, deps.Logger)
+
+	serverHandler := httpHandler.NewHandler(deps.Logger, kaspiClient, deviceService)
 
 	srv := httpServer.NewServer(deps.Logger, serverHandler, cfg.Kaspi.AuthMode)
 	run(ctx, cfg, srv)
