@@ -12,13 +12,13 @@ services:
       - kaspi-client-cert
       - kaspi-client-key
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - kaspiqr-wrapper-network
 
   postgres:
-    image: postgres:latest
+    image: postgres:17
     restart: always
     container_name: kaspiqr-wrapper-db
     env_file:
@@ -34,6 +34,19 @@ services:
       - pg-data:/var/lib/postgresql/data
     networks:
       - kaspiqr-wrapper-network
+
+  migrate:
+    image: migrate/migrate
+    container_name: kaspiqr-wrapper-migrate
+    command: ["-path=/migrations", "-database=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable", "up"]
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kaspiqr-wrapper-network
+
 
 volumes:
   pg-data:
