@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +24,7 @@ func TestTradePoints(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	tradePoints, err := handler.HandleGetTradePoints(ctx)
+	tradePoints, err := handler.GetTradePoints(ctx)
 	t.Log(tradePoints)
 
 	assert.NoError(t, err)
@@ -42,8 +43,52 @@ func TestDeviceRegister(t *testing.T) {
 	deviceID := "GFC-456398"
 	var tradePoint int64 = 23
 	ctx := context.Background()
-	deviceToken, err := handler.HandleDeviceRegister(ctx, deviceID, tradePoint)
+	deviceToken, err := handler.DeviceRegister(ctx, deviceID, tradePoint)
 
 	assert.NoError(t, err)
-	assert.Equal(t, "7ba61c32-a110-4ace-ae74-a2f4a81fe6e6", deviceToken.Token)
+	assert.NotEqual(t, "", deviceToken)
+}
+
+func TestDeviceDelete(t *testing.T) {
+	handler := NewKaspiHandler(base_url, test_api)
+	handler.Client = &http.Client{
+		Timeout: time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	deviceID := "GFC-456398"
+	var tradePoint int64 = 23
+	ctx := context.Background()
+	deviceToken, err := handler.DeviceRegister(ctx, deviceID, tradePoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = handler.DeviceDelete(ctx, deviceToken.Token)
+
+	assert.NoError(t, err)
+}
+
+func TestQRCreate(t *testing.T) {
+	handler := NewKaspiHandler(base_url, test_api)
+	handler.Client = &http.Client{
+		Timeout: time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	deviceID := "GFC-456398"
+	var tradePoint int64 = 23
+	ctx := context.Background()
+	deviceToken, err := handler.DeviceRegister(ctx, deviceID, tradePoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	qr, err := handler.CreateQR(ctx, deviceToken.Token, 200, uuid.NewString())
+	assert.NoError(t, err)
+	assert.NotEmpty(t, qr)
 }

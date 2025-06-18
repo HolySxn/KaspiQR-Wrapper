@@ -9,7 +9,7 @@ import (
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/utils"
 )
 
-func (h *KaspiHandler) HandleGetTradePoints(ctx context.Context) ([]models.TradePoint, error) {
+func (h *KaspiHandler) GetTradePoints(ctx context.Context) ([]models.TradePoint, error) {
 	url := h.baseURL + "/partner/tradepoints"
 
 	data, err := h.doRequest(ctx, http.MethodGet, url, nil)
@@ -30,7 +30,7 @@ type deviceRegisterRequest struct {
 	TradePointID int64  `json:"tradePointId"`
 }
 
-func (h *KaspiHandler) HandleDeviceRegister(ctx context.Context, deviceID string, tradePointID int64) (models.DeviceToken, error) {
+func (h *KaspiHandler) DeviceRegister(ctx context.Context, deviceID string, tradePointID int64) (models.DeviceToken, error) {
 	url := h.baseURL + "/device/register"
 	body := deviceRegisterRequest{
 		DeviceID:     deviceID,
@@ -48,4 +48,49 @@ func (h *KaspiHandler) HandleDeviceRegister(ctx context.Context, deviceID string
 	}
 
 	return deviceToken, nil
+}
+
+type deviceDeleteRequest struct {
+	DeviceToken string `json:"DeviceToken"`
+}
+
+func (h *KaspiHandler) DeviceDelete(ctx context.Context, deviceToken string) error {
+	url := h.baseURL + "/device/delete"
+	body := deviceDeleteRequest{
+		DeviceToken: deviceToken,
+	}
+
+	_, err := h.doRequest(ctx, http.MethodPost, url, body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type qrCreateRequest struct {
+	DeviceToken string  `json:"DeviceToken"`
+	Amount      float64 `json:"Amount"`
+	ExternalID  string  `json:"ExternalId"`
+}
+
+func (h *KaspiHandler) CreateQR(ctx context.Context, deviceToken string, amount float64, externalID string) (models.QrToken, error) {
+	url := h.baseURL + "/qr/create"
+	body := qrCreateRequest{
+		DeviceToken: deviceToken,
+		Amount:      amount,
+		ExternalID:  externalID,
+	}
+
+	data, err := h.doRequest(ctx, http.MethodPost, url, body)
+	if err != nil {
+		return models.QrToken{}, err
+	}
+
+	qr, err := utils.Convert[models.QrToken](data)
+	if err != nil {
+		return models.QrToken{}, fmt.Errorf("failed to convert data to qrToken points: %w", err)
+	}
+
+	return qr, nil
 }
