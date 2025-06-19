@@ -68,7 +68,7 @@ func (h *KaspiHandler) DeviceDelete(ctx context.Context, deviceToken string) err
 	return nil
 }
 
-type qrCreateRequest struct {
+type CreateRequest struct {
 	DeviceToken string  `json:"DeviceToken"`
 	Amount      float64 `json:"Amount"`
 	ExternalID  string  `json:"ExternalId"`
@@ -76,7 +76,7 @@ type qrCreateRequest struct {
 
 func (h *KaspiHandler) CreateQR(ctx context.Context, deviceToken string, amount float64, externalID string) (models.QrToken, error) {
 	url := h.baseURL + "/qr/create"
-	body := qrCreateRequest{
+	body := CreateRequest{
 		DeviceToken: deviceToken,
 		Amount:      amount,
 		ExternalID:  externalID,
@@ -93,4 +93,25 @@ func (h *KaspiHandler) CreateQR(ctx context.Context, deviceToken string, amount 
 	}
 
 	return qr, nil
+}
+
+func (h *KaspiHandler) CreateLink(ctx context.Context, deviceToken string, amount float64, externalID string) (models.PaymentData, error) {
+	url := h.baseURL + "/qr/create-link"
+	body := CreateRequest{
+		DeviceToken: deviceToken,
+		Amount:      amount,
+		ExternalID:  externalID,
+	}
+
+	data, err := h.doRequest(ctx, http.MethodPost, url, body)
+	if err != nil {
+		return models.PaymentData{}, err
+	}
+
+	link, err := utils.Convert[models.PaymentData](data)
+	if err != nil {
+		return models.PaymentData{}, fmt.Errorf("failed to convert data to PaymentData: %w", err)
+	}
+
+	return link, nil
 }
