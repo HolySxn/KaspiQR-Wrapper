@@ -115,3 +115,30 @@ func TestLinkCreate(t *testing.T) {
 	assert.NotEmpty(t, linkData)
 	t.Log(linkData)
 }
+func TestPaymentStatus(t *testing.T) {
+	handler := NewKaspiHandler(base_url, test_api)
+	handler.Client = &http.Client{
+		Timeout: time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	deviceID := "GFC-456398"
+	var tradePoint int64 = 23
+	ctx := context.Background()
+	deviceToken, err := handler.DeviceRegister(ctx, deviceID, tradePoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	qr, err := handler.CreateQR(ctx, deviceToken.Token, 200, uuid.NewString())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	status, err := handler.GetPaymentStatus(ctx, deviceToken.Token, qr.Token)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, status)
+	t.Log(status)
+}
