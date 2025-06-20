@@ -26,7 +26,10 @@ func main() {
 		return
 	}
 
-	kaspiHandler := kaspihandler.NewKaspiHandler(cfg.Kaspi.BaseURL, cfg.Kaspi.APIKey)
+	kaspiHandler, err := kaspihandler.NewKaspiHandler(cfg)
+	if err != nil {
+		logger.Error("failed to create kaspi ahndler", slog.Any("err", err))
+	}
 	serverHandler := httpHandler.NewHandler(logger, kaspiHandler)
 
 	srv := httpServer.NewServer(logger, serverHandler)
