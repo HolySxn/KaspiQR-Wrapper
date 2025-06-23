@@ -122,7 +122,7 @@ func TestPaymentStatus(t *testing.T) {
 	qr, err := handler.CreateQR(ctx, deviceToken.Token, 200, uuid.NewString())
 	assert.NoError(t, err)
 
-	status, err := handler.GetPaymentStatus(ctx, qr.Token)
+	status, err := handler.GetPaymentStatus(ctx, qr.QrPaymentId)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, status)
 	t.Log(status)

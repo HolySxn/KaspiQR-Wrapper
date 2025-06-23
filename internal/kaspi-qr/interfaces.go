@@ -12,5 +12,5 @@ type KaspiQR interface {
 	DeviceDelete(ctx context.Context, deviceToken string) error
 	CreateQR(ctx context.Context, deviceToken string, amount float64, externalID string) (models.QrToken, error)
 	CreateLink(ctx context.Context, deviceToken string, amount float64, externalID string) (models.PaymentData, error)
-	GetPaymentStatus(ctx context.Context, qrPaymentToken string) (models.PaymentStatus, error)
+	GetPaymentStatus(ctx context.Context, qrPaymentId int64) (models.PaymentStatus, error)
 }
