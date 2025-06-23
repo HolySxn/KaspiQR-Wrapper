@@ -77,7 +77,7 @@ func (c *MtlsKaspiClient) ReturnOperations(ctx context.Context, deviceToken stri
 	return operations, nil
 }
 
-func (c *MtlsKaspiClient) PaymentDetails(ctx context.Context, qrPaymentID int64, deviceToken string) (models.PaymentDetails, error) {
+func (c *MtlsKaspiClient) GetPaymentDetails(ctx context.Context, qrPaymentID int64, deviceToken string) (models.PaymentDetails, error) {
 	url := fmt.Sprintf("%s/payment/details?QrPaymentId=%d&DeviceToken=%s", c.BaseURL, qrPaymentID, deviceToken)
 
 	data, err := c.DoRequest(ctx, http.MethodGet, url, nil)

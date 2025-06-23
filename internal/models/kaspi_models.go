@@ -99,3 +99,15 @@ type PaymentDetails struct {
 type ReturnOperationId struct {
 	Id int64 `json:"ReturnOperationId"`
 }
+
+type ClientInfo struct {
+	ClientName string `json:"ClientName"`
+}
+
+type RemotePayment struct {
+	QrPaymentId int64 `json:"QrPaymentId"`
+}
+
+type CancelRemotePaymentStatus struct {
+	Status string `json:"Status"`
+}
