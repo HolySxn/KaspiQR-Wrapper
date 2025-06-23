@@ -1,7 +1,9 @@
-package kaspihandler
+package apikeyclient
 
 import (
 	"context"
+	"crypto/tls"
+	"net/http"
 	"testing"
 
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
@@ -12,12 +14,13 @@ import (
 const testAPIKey = "test_F3AD8556847B4736B391CB4D5CFDD14D"
 const baseURL = "https://mtokentest.kaspi.kz:8543/r1/v01"
 
-func newTestHandler() (*KaspiHandler, error) {
+func newTestHandler() *APIKeyKaspiClient {
 	cfg := &config.Config{
 		Kaspi: struct {
 			BaseURL    string          `mapstructure:"base_url"`
 			AuthMode   config.AuthMode `mapstructure:"auth_mode"`
 			APIKey     string          `mapstructure:"-"`
+			CompanyBIN string          `mapstructure:"-"`
 			ClientCert string          `mapstructure:"-"`
 			ClientKey  string          `mapstructure:"-"`
 			CACert     string          `mapstructure:"-"`
@@ -25,19 +28,23 @@ func newTestHandler() (*KaspiHandler, error) {
 			BaseURL:    baseURL,
 			AuthMode:   config.AuthModeAPIKey,
 			APIKey:     testAPIKey,
+			CompanyBIN: "",
 			ClientCert: "",
 			ClientKey:  "",
 			CACert:     "",
 		},
 	}
-	return NewKaspiHandler(cfg)
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+	return New(cfg.Kaspi.BaseURL, cfg.Kaspi.APIKey, httpClient)
 }
 
 func TestTradePoints(t *testing.T) {
-	handler, err := newTestHandler()
-	if err != nil {
-		t.Fatal(err)
-	}
+	handler := newTestHandler()
 
 	ctx := context.Background()
 	tradePoints, err := handler.GetTradePoints(ctx)
@@ -48,8 +55,7 @@ func TestTradePoints(t *testing.T) {
 }
 
 func TestDeviceRegister(t *testing.T) {
-	handler, err := newTestHandler()
-	assert.NoError(t, err)
+	handler := newTestHandler()
 
 	deviceID := "GFC-456398"
 	var tradePoint int64 = 23
@@ -61,8 +67,7 @@ func TestDeviceRegister(t *testing.T) {
 }
 
 func TestDeviceDelete(t *testing.T) {
-	handler, err := newTestHandler()
-	assert.NoError(t, err)
+	handler := newTestHandler()
 
 	deviceID := "GFC-456398"
 	var tradePoint int64 = 23
@@ -75,8 +80,7 @@ func TestDeviceDelete(t *testing.T) {
 }
 
 func TestQRCreate(t *testing.T) {
-	handler, err := newTestHandler()
-	assert.NoError(t, err)
+	handler := newTestHandler()
 
 	deviceID := "GFC-456398"
 	var tradePoint int64 = 23
@@ -90,8 +94,7 @@ func TestQRCreate(t *testing.T) {
 }
 
 func TestLinkCreate(t *testing.T) {
-	handler, err := newTestHandler()
-	assert.NoError(t, err)
+	handler := newTestHandler()
 
 	deviceID := "GFC-456398"
 	var tradePoint int64 = 23
@@ -106,8 +109,7 @@ func TestLinkCreate(t *testing.T) {
 }
 
 func TestPaymentStatus(t *testing.T) {
-	handler, err := newTestHandler()
-	assert.NoError(t, err)
+	handler := newTestHandler()
 
 	deviceID := "GFC-456398"
 	var tradePoint int64 = 23

@@ -26,7 +26,7 @@ type QrPaymentBehaviorOptions struct {
 type QrToken struct {
 	Token                    string                   `json:"QrToken"`
 	ExpireDate               time.Time                `json:"ExpireDate"`
-	QrPaymentId              int64                      `json:"QrPaymentId"`
+	QrPaymentId              int64                    `json:"QrPaymentId"`
 	PaymentMethods           []string                 `json:"PaymentMethods"`
 	QrPaymentBehaviorOptions QrPaymentBehaviorOptions `json:"QrPaymentBehaviorOptions"`
 }
@@ -38,11 +38,11 @@ type PaymentBehaviorOptions struct {
 }
 
 type PaymentData struct {
-	PaymentLink             string                `json:"PaymentLink"`
-	ExpireDate              time.Time             `json:"ExpireDate"`
-	PaymentId               int                   `json:"PaymentId"`
-	PaymentMethods          []string              `json:"PaymentMethods"`
-	PaymentBehaviorOptions  PaymentBehaviorOptions `json:"PaymentBehaviorOptions"`
+	PaymentLink            string                 `json:"PaymentLink"`
+	ExpireDate             time.Time              `json:"ExpireDate"`
+	PaymentId              int                    `json:"PaymentId"`
+	PaymentMethods         []string               `json:"PaymentMethods"`
+	PaymentBehaviorOptions PaymentBehaviorOptions `json:"PaymentBehaviorOptions"`
 }
 
 type PaymentStatus struct {

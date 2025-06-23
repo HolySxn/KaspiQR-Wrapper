@@ -1,4 +1,4 @@
-package kaspihandler
+package base
 
 import (
 	"context"
@@ -9,10 +9,10 @@ import (
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/utils"
 )
 
-func (h *KaspiHandler) GetTradePoints(ctx context.Context) ([]models.TradePoint, error) {
-	url := h.baseURL + "/partner/tradepoints"
+func (c *BaseKaspiClient) GetTradePoints(ctx context.Context) ([]models.TradePoint, error) {
+	url := c.BaseURL + "/partner/tradepoints"
 
-	data, err := h.doRequest(ctx, http.MethodGet, url, nil)
+	data, err := c.doRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -30,14 +30,14 @@ type deviceRegisterRequest struct {
 	TradePointID int64  `json:"tradePointId"`
 }
 
-func (h *KaspiHandler) DeviceRegister(ctx context.Context, deviceID string, tradePointID int64) (models.DeviceToken, error) {
-	url := h.baseURL + "/device/register"
+func (c *BaseKaspiClient) DeviceRegister(ctx context.Context, deviceID string, tradePointID int64) (models.DeviceToken, error) {
+	url := c.BaseURL + "/device/register"
 	body := deviceRegisterRequest{
 		DeviceID:     deviceID,
 		TradePointID: tradePointID,
 	}
 
-	data, err := h.doRequest(ctx, http.MethodPost, url, body)
+	data, err := c.doRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return models.DeviceToken{}, err
 	}
@@ -54,13 +54,13 @@ type deviceDeleteRequest struct {
 	DeviceToken string `json:"DeviceToken"`
 }
 
-func (h *KaspiHandler) DeviceDelete(ctx context.Context, deviceToken string) error {
-	url := h.baseURL + "/device/delete"
+func (c *BaseKaspiClient) DeviceDelete(ctx context.Context, deviceToken string) error {
+	url := c.BaseURL + "/device/delete"
 	body := deviceDeleteRequest{
 		DeviceToken: deviceToken,
 	}
 
-	_, err := h.doRequest(ctx, http.MethodPost, url, body)
+	_, err := c.doRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return err
 	}
@@ -74,15 +74,15 @@ type CreateRequest struct {
 	ExternalID  string  `json:"ExternalId"`
 }
 
-func (h *KaspiHandler) CreateQR(ctx context.Context, deviceToken string, amount float64, externalID string) (models.QrToken, error) {
-	url := h.baseURL + "/qr/create"
+func (c *BaseKaspiClient) CreateQR(ctx context.Context, deviceToken string, amount float64, externalID string) (models.QrToken, error) {
+	url := c.BaseURL + "/qr/create"
 	body := CreateRequest{
 		DeviceToken: deviceToken,
 		Amount:      amount,
 		ExternalID:  externalID,
 	}
 
-	data, err := h.doRequest(ctx, http.MethodPost, url, body)
+	data, err := c.doRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return models.QrToken{}, err
 	}
@@ -95,15 +95,15 @@ func (h *KaspiHandler) CreateQR(ctx context.Context, deviceToken string, amount 
 	return qr, nil
 }
 
-func (h *KaspiHandler) CreateLink(ctx context.Context, deviceToken string, amount float64, externalID string) (models.PaymentData, error) {
-	url := h.baseURL + "/qr/create-link"
+func (c *BaseKaspiClient) CreateLink(ctx context.Context, deviceToken string, amount float64, externalID string) (models.PaymentData, error) {
+	url := c.BaseURL + "/qr/create-link"
 	body := CreateRequest{
 		DeviceToken: deviceToken,
 		Amount:      amount,
 		ExternalID:  externalID,
 	}
 
-	data, err := h.doRequest(ctx, http.MethodPost, url, body)
+	data, err := c.doRequest(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return models.PaymentData{}, err
 	}
@@ -116,8 +116,8 @@ func (h *KaspiHandler) CreateLink(ctx context.Context, deviceToken string, amoun
 	return link, nil
 }
 
-func (h *KaspiHandler) GetPaymentStatus(ctx context.Context, deviceToken string, qrPaymentToken string) (models.PaymentStatus, error) {
-	url := h.baseURL + "/payment/status/" + qrPaymentToken
+func (h *BaseKaspiClient) GetPaymentStatus(ctx context.Context, deviceToken string, qrPaymentToken string) (models.PaymentStatus, error) {
+	url := h.BaseURL + "/payment/status/" + qrPaymentToken
 
 	data, err := h.doRequest(ctx, http.MethodPost, url, nil)
 	if err != nil {
