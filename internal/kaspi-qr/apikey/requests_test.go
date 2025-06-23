@@ -11,8 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const testAPIKey = "test_F3AD8556847B4736B391CB4D5CFDD14D"
-const baseURL = "https://mtokentest.kaspi.kz:8543/r1/v01"
+const (
+	testAPIKey = "test_F3AD8556847B4736B391CB4D5CFDD14D"
+	baseURL    = "https://mtokentest.kaspi.kz:8543/r1/v01"
+)
 
 func newTestHandler() *APIKeyKaspiClient {
 	cfg := &config.Config{
@@ -120,7 +122,7 @@ func TestPaymentStatus(t *testing.T) {
 	qr, err := handler.CreateQR(ctx, deviceToken.Token, 200, uuid.NewString())
 	assert.NoError(t, err)
 
-	status, err := handler.GetPaymentStatus(ctx, deviceToken.Token, qr.Token)
+	status, err := handler.GetPaymentStatus(ctx, qr.Token)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, status)
 	t.Log(status)

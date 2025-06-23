@@ -22,7 +22,7 @@ func New(baseURL, apiKey string, httpClient *http.Client) *APIKeyKaspiClient {
 	}
 }
 
-func (c *APIKeyKaspiClient) seteHeader(req *http.Request) {
+func (c *APIKeyKaspiClient) SeteHeader(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Request-ID", uuid.New().String())

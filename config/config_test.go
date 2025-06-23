@@ -28,7 +28,7 @@ kaspi:
   auth_mode: "api_key"
 `
 	configPath := "test_config.yaml"
-	err := os.WriteFile(configPath, []byte(configContent), 0644)
+	err := os.WriteFile(configPath, []byte(configContent), 0o644)
 	assert.NoError(t, err)
 	defer os.Remove(configPath)
 

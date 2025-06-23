@@ -28,5 +28,4 @@ func (h *Handler) QRPay() {
 	if err != nil {
 		return
 	}
-
 }
