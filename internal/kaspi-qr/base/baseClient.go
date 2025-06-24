@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var kaspiStatusMessages = map[int]string{
+var KaspiStatusMessages = map[int]string{
 	0:         "Успешный статус операции",
 	-10000:    "Отсутствует сертификат клиента",
 	-1501:     "Устройство с заданным идентификатором не найдено",
@@ -34,11 +34,21 @@ var kaspiStatusMessages = map[int]string{
 }
 
 type BaseKaspiClient struct {
-	Client  *http.Client
-	BaseURL string
+	Client     *http.Client
+	BaseURL    string
+	HeadSetter func(req *http.Request)
 }
 
-func (c *BaseKaspiClient) SeteHeader(req *http.Request) {
+func NewBaseKaspiClient(baseURL string, client *http.Client) *BaseKaspiClient {
+	base := &BaseKaspiClient{
+		BaseURL: baseURL,
+		Client:  client,
+	}
+	base.HeadSetter = base.setHeader
+	return base
+}
+
+func (c *BaseKaspiClient) setHeader(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Request-ID", uuid.New().String())
@@ -61,7 +71,7 @@ func (c *BaseKaspiClient) DoRequest(ctx context.Context, method, url string, bod
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	c.SeteHeader(req)
+	c.HeadSetter(req)
 
 	res, err := c.Client.Do(req)
 	if err != nil {
@@ -74,7 +84,7 @@ func (c *BaseKaspiClient) DoRequest(ctx context.Context, method, url string, bod
 	}
 
 	if rawResp.StatusCode != 0 {
-		return nil, fmt.Errorf("%s", kaspiStatusMessages[rawResp.StatusCode])
+		return nil, fmt.Errorf("%s", KaspiStatusMessages[rawResp.StatusCode])
 	}
 
 	return rawResp.Data, nil

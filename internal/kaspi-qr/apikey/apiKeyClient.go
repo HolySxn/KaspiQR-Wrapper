@@ -13,16 +13,16 @@ type APIKeyKaspiClient struct {
 }
 
 func New(baseURL, apiKey string, httpClient *http.Client) *APIKeyKaspiClient {
-	return &APIKeyKaspiClient{
-		BaseKaspiClient: &baseClient.BaseKaspiClient{
-			BaseURL: baseURL,
-			Client:  httpClient,
-		},
-		APIKey: apiKey,
+	base := baseClient.NewBaseKaspiClient(baseURL, httpClient)
+	apiClient := &APIKeyKaspiClient{
+		BaseKaspiClient: base,
+		APIKey:          apiKey,
 	}
+	apiClient.HeadSetter = apiClient.setHeader
+	return apiClient
 }
 
-func (c *APIKeyKaspiClient) SeteHeader(req *http.Request) {
+func (c *APIKeyKaspiClient) setHeader(req *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Request-ID", uuid.New().String())
