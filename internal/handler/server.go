@@ -2,16 +2,17 @@ package httpServer
 
 import (
 	"log/slog"
+	"net/http"
 
 	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/handler/handlers"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
 func NewServer(
 	logger *slog.Logger,
 	serverHandler *httpHandler.Handler,
-) *gin.Engine {
-	router := gin.New()
+) http.Handler {
+	router := mux.NewRouter()
 	addRoutes(router, serverHandler)
 
 	return router

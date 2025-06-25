@@ -14,7 +14,6 @@ import (
 	httpServer "github.com/HolySxn/KaspiQR-Wrapper/internal/handler"
 	httpHandler "github.com/HolySxn/KaspiQR-Wrapper/internal/handler/handlers"
 	kaspiqr "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -36,7 +35,7 @@ func main() {
 	run(ctx, cfg, srv, logger)
 }
 
-func run(ctx context.Context, cfg *config.Config, srv *gin.Engine, logger *slog.Logger) {
+func run(ctx context.Context, cfg *config.Config, srv http.Handler, logger *slog.Logger) {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
