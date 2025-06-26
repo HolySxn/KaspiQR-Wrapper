@@ -25,14 +25,14 @@ func main() {
 		return
 	}
 
-	kaspiHandler, err := kaspiqr.NewKaspiClient(cfg)
+	kaspiClient, err := kaspiqr.NewKaspiClient(cfg)
 	if err != nil {
 		logger.Error("failed to create kaspi handler", slog.Any("err", err))
 		return
 	}
-	serverHandler := httpHandler.NewHandler(logger, kaspiHandler)
+	serverHandler := httpHandler.NewHandler(logger, kaspiClient)
 
-	srv := httpServer.NewServer(logger, serverHandler)
+	srv := httpServer.NewServer(logger, serverHandler, cfg.Kaspi.AuthMode)
 	run(ctx, cfg, srv, logger)
 }
 

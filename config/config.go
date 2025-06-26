@@ -8,12 +8,10 @@ import (
 	"github.com/sethvargo/go-envconfig"
 )
 
-type AuthMode string
-
 const (
-	AuthModeAPIKey  AuthMode = "api_key"
-	AuthModeMTLS    AuthMode = "mtls"
-	AuthModeIPBased AuthMode = "ip_based"
+	AuthModeAPIKey  string = "api_key"
+	AuthModeMTLS    string = "mtls"
+	AuthModeIPBased string = "ip_based"
 )
 
 type ServerConfig struct {
@@ -23,13 +21,13 @@ type ServerConfig struct {
 }
 
 type KaspiConfig struct {
-	BaseURL    string   `env:"BASE_URL"`
-	AuthMode   AuthMode `env:"AUTH_MODE"`
-	APIKey     string   `env:"API_KEY"`
-	CompanyBIN string   `env:"COMPANY_BIN"`
-	ClientCert string   `env:"CLIENT_CERT"`
-	ClientKey  string   `env:"CLIENT_KEY"`
-	CACert     string   `env:"CA_CERT"`
+	BaseURL    string `env:"BASE_URL"`
+	AuthMode   string `env:"AUTH_MODE"`
+	APIKey     string `env:"API_KEY"`
+	CompanyBIN string `env:"COMPANY_BIN"`
+	ClientCert string `env:"CLIENT_CERT"`
+	ClientKey  string `env:"CLIENT_KEY"`
+	CACert     string `env:"CA_CERT"`
 }
 
 type PostgresConfig struct {

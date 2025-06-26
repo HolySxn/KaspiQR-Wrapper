@@ -3,11 +3,15 @@ package kaspiqr
 import (
 	"context"
 
+	mtlsClient "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr/mtls"
 	"github.com/HolySxn/KaspiQR-Wrapper/internal/models"
 )
 
+var _ KaspiQRBase = (*mtlsClient.MtlsKaspiClient)(nil)
+
 // Common methods for all clients
 type KaspiQRBase interface {
+	Ping(ctx context.Context) error
 	GetTradePoints(ctx context.Context) ([]models.TradePoint, error)
 	DeviceRegister(ctx context.Context, deviceID string, tradePointID int64) (models.DeviceToken, error)
 	DeviceDelete(ctx context.Context, deviceToken string) error

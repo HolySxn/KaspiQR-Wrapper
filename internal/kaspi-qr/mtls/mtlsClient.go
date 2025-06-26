@@ -11,10 +11,8 @@ type MtlsKaspiClient struct {
 }
 
 func New(baseURL string, httpClient *http.Client) *MtlsKaspiClient {
+	base := baseClient.NewBaseKaspiClient(baseURL, httpClient)
 	return &MtlsKaspiClient{
-		BaseKaspiClient: &baseClient.BaseKaspiClient{
-			BaseURL: baseURL,
-			Client:  httpClient,
-		},
+		BaseKaspiClient: base,
 	}
 }

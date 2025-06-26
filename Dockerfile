@@ -6,7 +6,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 WORKDIR /build
-COPY . .
+COPY cmd/ cmd/
+COPY config/ config/
+COPY internal/ internal/
 
 WORKDIR /build/cmd/$CMD
 RUN CGO_ENABLED=0 go build -o main

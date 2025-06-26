@@ -23,6 +23,21 @@ func NewHandler(logger *slog.Logger, kaspiClient kaspiqr.KaspiQRBase) *Handler {
 	}
 }
 
+// GET /health/ping
+func (h *Handler) Ping(w http.ResponseWriter, r *http.Request) {
+	h.logger.Info("Handling Ping request")
+	ctx := r.Context()
+
+	if err := h.kaspiClient.Ping(ctx); err != nil {
+		h.logger.Error("Ping failed", slog.String("error", err.Error()))
+		http.Error(w, "An unexpected error occurred. Please try again later.", http.StatusInternalServerError)
+		return
+	}
+
+	h.logger.Info("Ping successful")
+	w.WriteHeader(http.StatusOK)
+}
+
 // GET /partner/tradepoints
 func (h *Handler) GetTradePoints(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info("Handling GetTradePoints request")
@@ -31,7 +46,7 @@ func (h *Handler) GetTradePoints(w http.ResponseWriter, r *http.Request) {
 	points, err := h.kaspiClient.GetTradePoints(ctx)
 	if err != nil {
 		h.logger.Error("Failed to get trade points", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to retrieve trade points at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -49,7 +64,7 @@ func (h *Handler) DeviceRegister(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.logger.Error("Invalid request body", slog.String("error", err.Error()))
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format. Please check your input.", http.StatusBadRequest)
 		return
 	}
 
@@ -58,7 +73,7 @@ func (h *Handler) DeviceRegister(w http.ResponseWriter, r *http.Request) {
 	token, err := h.kaspiClient.DeviceRegister(ctx, req.DeviceID, req.TradePointID)
 	if err != nil {
 		h.logger.Error("Failed to register device", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to register the device at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -75,7 +90,7 @@ func (h *Handler) DeviceDelete(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.logger.Error("Invalid request body", slog.String("error", err.Error()))
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format. Please check your input.", http.StatusBadRequest)
 		return
 	}
 
@@ -84,7 +99,7 @@ func (h *Handler) DeviceDelete(w http.ResponseWriter, r *http.Request) {
 	err := h.kaspiClient.DeviceDelete(ctx, req.DeviceToken)
 	if err != nil {
 		h.logger.Error("Failed to delete device", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to delete the device at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -103,7 +118,7 @@ func (h *Handler) CreateQR(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.logger.Error("Invalid request body", slog.String("error", err.Error()))
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format. Please check your input.", http.StatusBadRequest)
 		return
 	}
 
@@ -112,7 +127,7 @@ func (h *Handler) CreateQR(w http.ResponseWriter, r *http.Request) {
 	qr, err := h.kaspiClient.CreateQR(ctx, req.DeviceToken, req.Amount, req.ExternalID)
 	if err != nil {
 		h.logger.Error("Failed to create QR", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to create QR at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -131,7 +146,7 @@ func (h *Handler) CreateLink(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.logger.Error("Invalid request body", slog.String("error", err.Error()))
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format. Please check your input.", http.StatusBadRequest)
 		return
 	}
 
@@ -140,7 +155,7 @@ func (h *Handler) CreateLink(w http.ResponseWriter, r *http.Request) {
 	link, err := h.kaspiClient.CreateLink(ctx, req.DeviceToken, req.Amount, req.ExternalID)
 	if err != nil {
 		h.logger.Error("Failed to create link", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to create the link at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -157,7 +172,7 @@ func (h *Handler) GetPaymentStatus(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		h.logger.Error("Invalid qrPaymentId", slog.String("qrPaymentId", idStr), slog.String("error", err.Error()))
-		http.Error(w, "invalid qrPaymentId", http.StatusBadRequest)
+		http.Error(w, "Invalid QR Payment ID. Please check your input.", http.StatusBadRequest)
 		return
 	}
 
@@ -166,7 +181,7 @@ func (h *Handler) GetPaymentStatus(w http.ResponseWriter, r *http.Request) {
 	status, err := h.kaspiClient.GetPaymentStatus(ctx, id)
 	if err != nil {
 		h.logger.Error("Failed to get payment status", slog.String("error", err.Error()))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Unable to retrieve payment status at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 

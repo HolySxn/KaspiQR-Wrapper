@@ -25,7 +25,7 @@ func (h *Handler) CreateReturnMTLS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
 		return
 	}
 
@@ -33,7 +33,7 @@ func (h *Handler) CreateReturnMTLS(w http.ResponseWriter, r *http.Request) {
 
 	result, err := mtlsClient.CreateReturn(ctx, req.DeviceToken, req.ExternalID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "An error occurred while processing your request. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -53,7 +53,7 @@ func (h *Handler) GetReturnStatusMTLS(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		http.Error(w, "invalid qrReturnId", http.StatusBadRequest)
+		http.Error(w, "Invalid qrReturnId", http.StatusBadRequest)
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *Handler) GetReturnStatusMTLS(w http.ResponseWriter, r *http.Request) {
 
 	status, err := mtlsClient.GetReturnStatus(ctx, id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "An error occurred while retrieving the return status. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *Handler) ReturnOperationsMTLS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
 		return
 	}
 
@@ -91,7 +91,7 @@ func (h *Handler) ReturnOperationsMTLS(w http.ResponseWriter, r *http.Request) {
 
 	ops, err := mtlsClient.ReturnOperations(ctx, req.DeviceToken, req.QrReturnID, req.MaxResult)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "An error occurred while retrieving return operations. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -111,7 +111,7 @@ func (h *Handler) GetPaymentDetailsMTLS(w http.ResponseWriter, r *http.Request) 
 
 	qrPaymentID, err := strconv.ParseInt(qrPaymentIDStr, 10, 64)
 	if err != nil {
-		http.Error(w, "invalid qrPaymentId", http.StatusBadRequest)
+		http.Error(w, "Invalid qrPaymentId", http.StatusBadRequest)
 		return
 	}
 
@@ -119,7 +119,7 @@ func (h *Handler) GetPaymentDetailsMTLS(w http.ResponseWriter, r *http.Request) 
 
 	details, err := mtlsClient.GetPaymentDetails(ctx, qrPaymentID, deviceToken)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "An error occurred while retrieving payment details. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
@@ -142,7 +142,7 @@ func (h *Handler) PaymentReturnMTLS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		http.Error(w, "Invalid request format", http.StatusBadRequest)
 		return
 	}
 
@@ -150,7 +150,7 @@ func (h *Handler) PaymentReturnMTLS(w http.ResponseWriter, r *http.Request) {
 
 	result, err := mtlsClient.PaymentReturn(ctx, req.DeviceToken, req.QrPaymentID, req.QrReturnID, req.Amount)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "An error occurred while processing the payment return. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 

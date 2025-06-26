@@ -12,11 +12,9 @@ type IPBasedKaspiClient struct {
 }
 
 func New(baseURL, bin string, httpClient *http.Client) *IPBasedKaspiClient {
+	base := baseClient.NewBaseKaspiClient(baseURL, httpClient)
 	return &IPBasedKaspiClient{
-		BaseKaspiClient: &baseClient.BaseKaspiClient{
-			BaseURL: baseURL,
-			Client:  httpClient,
-		},
-		BIN: bin,
+		BaseKaspiClient: base,
+		BIN:             bin,
 	}
 }

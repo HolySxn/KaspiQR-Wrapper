@@ -5,6 +5,8 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/HolySxn/KaspiQR-Wrapper/config"
 	apikeyclient "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr/apikey"
@@ -14,23 +16,27 @@ import (
 
 func NewKaspiClient(cfg *config.Config) (KaspiQRBase, error) {
 	var httpClient *http.Client
+	var tlsConfig *tls.Config
+	var err error
 
 	switch cfg.Kaspi.AuthMode {
 	case config.AuthModeAPIKey:
-		httpClient = &http.Client{}
+		tlsConfig, err = tlsConfigWithRootCA(cfg.Kaspi.CACert)
 	case config.AuthModeMTLS, config.AuthModeIPBased:
-		tlsConfig, err := tlsConfig(cfg.Kaspi.ClientCert, cfg.Kaspi.ClientKey, cfg.Kaspi.CACert)
-		if err != nil {
-			return nil, err
-		}
-
-		httpClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
-			},
-		}
+		tlsConfig, err = tlsConfigWithClientCert(cfg.Kaspi.ClientCert, cfg.Kaspi.ClientKey, cfg.Kaspi.CACert)
 	default:
 		return nil, fmt.Errorf("unsupported authentication mode: %s", cfg.Kaspi.AuthMode)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create TLS config: %w", err)
+	}
+
+	httpClient = &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: tlsConfig,
+		},
 	}
 
 	switch cfg.Kaspi.AuthMode {
@@ -45,31 +51,40 @@ func NewKaspiClient(cfg *config.Config) (KaspiQRBase, error) {
 	return nil, fmt.Errorf("unexpected error initializing Kaspi client")
 }
 
-func tlsConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
+func tlsConfigWithClientCert(certFile, keyFile, caFile string) (*tls.Config, error) {
+	config, err := tlsConfigWithRootCA(caFile)
+	if err != nil {
+		return nil, err
+	}
+
 	clientCert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
 		return nil, err
 	}
 
-	// caCert, err := os.ReadFile(caFile)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	config.Certificates = []tls.Certificate{clientCert}
 
-	// caCertPool := x509.NewCertPool()
-	// if !caCertPool.AppendCertsFromPEM(caCert) {
-	// 	return nil, fmt.Errorf("failed to append CA cert")
-	// }
+	return config, nil
+}
 
+func tlsConfigWithRootCA(caFile string) (*tls.Config, error) {
 	caCertPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, err
 	}
 
+	caCert, err := os.ReadFile(caFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load CA cert: %w", err)
+	}
+
+	if !caCertPool.AppendCertsFromPEM(caCert) {
+		return nil, fmt.Errorf("failed to append CA cert to pool")
+	}
+
 	config := &tls.Config{
-		Certificates: []tls.Certificate{clientCert},
-		RootCAs:      caCertPool,
-		MinVersion:   tls.VersionTLS12,
+		RootCAs:    caCertPool,
+		MinVersion: tls.VersionTLS12,
 	}
 
 	return config, nil
