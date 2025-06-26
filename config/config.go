@@ -2,8 +2,6 @@ package config
 
 import (
 	"context"
-	"log/slog"
-	"os"
 
 	"github.com/sethvargo/go-envconfig"
 )
@@ -51,11 +49,4 @@ func LoadConfig(ctx context.Context) (*Config, error) {
 		return nil, err
 	}
 	return &cfg, nil
-}
-
-func NewLogger() *slog.Logger {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}))
-	return logger
 }

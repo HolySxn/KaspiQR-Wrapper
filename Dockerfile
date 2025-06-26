@@ -5,7 +5,6 @@ WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
 
-WORKDIR /build
 COPY cmd/ cmd/
 COPY config/ config/
 COPY internal/ internal/
