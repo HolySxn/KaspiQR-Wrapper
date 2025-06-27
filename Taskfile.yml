@@ -1,0 +1,9 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  migrate:create:
+    desc: |
+      Создание новой миграции (usage: task migrate:create -- название_миграции)
+    cmd: migrate create -ext=sql -dir=migrations -seq {{.CLI_ARGS}}
