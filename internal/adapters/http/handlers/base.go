@@ -8,18 +8,21 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/HolySxn/KaspiQR-Wrapper/internal/core/service"
 	kaspiqr "github.com/HolySxn/KaspiQR-Wrapper/internal/kaspi-qr"
 )
 
 type Handler struct {
-	logger      *slog.Logger
-	kaspiClient kaspiqr.KaspiQRBase
+	logger        *slog.Logger
+	kaspiClient   kaspiqr.KaspiQRBase
+	deviceService *service.DeviceService
 }
 
-func NewHandler(logger *slog.Logger, kaspiClient kaspiqr.KaspiQRBase) *Handler {
+func NewHandler(logger *slog.Logger, kaspiClient kaspiqr.KaspiQRBase, deviceService *service.DeviceService) *Handler {
 	return &Handler{
-		logger:      logger,
-		kaspiClient: kaspiClient,
+		logger:        logger,
+		kaspiClient:   kaspiClient,
+		deviceService: deviceService,
 	}
 }
 
@@ -69,8 +72,7 @@ func (h *Handler) DeviceRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-
-	token, err := h.kaspiClient.DeviceRegister(ctx, req.DeviceID, req.TradePointID)
+	token, err := h.deviceService.RegisterDevice(ctx, req.DeviceID, req.TradePointID)
 	if err != nil {
 		h.logger.Error("Failed to register device", slog.String("error", err.Error()))
 		http.Error(w, "Unable to register the device at the moment. Please try again later.", http.StatusInternalServerError)
@@ -78,14 +80,14 @@ func (h *Handler) DeviceRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.logger.Info("Successfully registered device", slog.String("deviceId", req.DeviceID))
-	json.NewEncoder(w).Encode(token)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
 
 // POST /device/delete
 func (h *Handler) DeviceDelete(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info("Handling DeviceDelete request")
 	var req struct {
-		DeviceToken string `json:"deviceToken"`
+		DeviceID string `json:"deviceId"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -95,15 +97,14 @@ func (h *Handler) DeviceDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-
-	err := h.kaspiClient.DeviceDelete(ctx, req.DeviceToken)
+	err := h.deviceService.DeleteDevice(ctx, req.DeviceID)
 	if err != nil {
 		h.logger.Error("Failed to delete device", slog.String("error", err.Error()))
 		http.Error(w, "Unable to delete the device at the moment. Please try again later.", http.StatusInternalServerError)
 		return
 	}
 
-	h.logger.Info("Successfully deleted device", slog.String("deviceToken", req.DeviceToken))
+	h.logger.Info("Successfully deleted device", slog.String("deviceId", req.DeviceID))
 	w.WriteHeader(http.StatusNoContent)
 }
 
